@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Select from 'react-select';
 import './App.css';
+import Header from './header';
+import Footer from './footer';
 
 const locations = [
   { value: [-26.2041, 28.0473], label: 'Gauteng' },
@@ -18,18 +20,48 @@ const locations = [
 ];
 
 function App() {
-  const [precipitationImage, setPrecipitationImage] = useState('');
-  const [soilImage, setSoilImage] = useState('');
-  const [temperatureImage, setTemperatureImage] = useState('');
+  const [weatherData, setWeatherData] = useState(null);
+  const [chatbotResponse, setChatbotResponse] = useState('');
   const [location, setLocation] = useState(null);
   const selectRef = useRef(null);
 
-  const fetchData = async (endpoint, setter) => {
+  const fetchWeatherData = async (latitude, longitude) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/${endpoint}`);
-      setter(response.data.image);
+      const response = await axios.get(`https://api.open-meteo.com/v1/forecast`, {
+        params: {
+          latitude,
+          longitude,
+          hourly: ['temperature_2m', 'precipitation', 'soil_temperature_0cm', 'soil_moisture_0_to_10cm'],
+          timezone: 'auto'
+        }
+      });
+      setWeatherData(response.data);
+      const responseText = await getChatbotResponse(response.data);
+      setChatbotResponse(responseText);
     } catch (error) {
-      console.error(`Error fetching ${endpoint} data:`, error);
+      console.error('Error fetching weather data:', error);
+    }
+  };
+
+  const getChatbotResponse = async (data) => {
+    const temperature = data.hourly.temperature_2m[0]; // Current temperature
+    const precipitation = data.hourly.precipitation[0]; // Current precipitation
+    const soilTemperature = data.hourly.soil_temperature_0cm[0]; // Soil temperature
+    const soilMoisture = data.hourly.soil_moisture_0_to_10cm[0]; // Soil moisture
+
+    // Construct a query for Meta AI based on the weather data
+    const query = `Given the temperature of ${temperature}°C, precipitation of ${precipitation}mm, soil temperature of ${soilTemperature}°C, and soil moisture of ${soilMoisture}, provide advice on addressing climate-related challenges such as deforestation, drought, or urban heat islands.`;
+
+    try {
+      const metaAIResponse = await axios.post('https://api.meta.com/v1/chat', {
+        prompt: query,
+        model: 'LLaMA-3', // Change this to the appropriate model name
+        max_tokens: 150
+      });
+      return metaAIResponse.data.response; // Adjust based on the actual response structure
+    } catch (error) {
+      console.error('Error fetching Meta AI response:', error);
+      return "I'm unable to provide advice at the moment.";
     }
   };
 
@@ -37,22 +69,16 @@ function App() {
     if (selectedOption) {
       const [lat, lon] = selectedOption.value;
       setLocation([parseFloat(lat), parseFloat(lon)]);
+      fetchWeatherData(lat, lon); // Fetch weather data for the selected location
     } else {
       setLocation(null);
     }
   };
 
-  useEffect(() => {
-    if (location) {
-      fetchData('precipitation', setPrecipitationImage);
-      fetchData('soil', setSoilImage);
-      fetchData('temperature', setTemperatureImage);
-    }
-  }, [location]);
-
   return (
     <div className="app">
-      <header className="app-header">
+      <Header />
+      <div className="app-header">
         <h1>GeoTech Climate Resilience</h1>
         <div className="select-container">
           <Select
@@ -84,38 +110,38 @@ function App() {
             }}
           />
         </div>
-      </header>
-      {location && (
+      </div>
+      {location && weatherData && (
         <main>
-          <div className="map-container">
+          <div className="map-container" style={{ height: '400px' }}>
             <MapContainer center={location} zoom={8} className="map">
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution="© OpenStreetMap contributors"
               />
+              <Marker position={location}>
+                <Popup>
+                  <h3>Weather Data</h3>
+                  <p>Temperature: {weatherData.hourly.temperature_2m[0]} °C</p>
+                  <p>Precipitation: {weatherData.hourly.precipitation[0]} mm</p>
+                  <p>Soil Temperature: {weatherData.hourly.soil_temperature_0cm[0]} °C</p>
+                  <p>Soil Moisture: {weatherData.hourly.soil_moisture_0_to_10cm[0]}</p>
+                </Popup>
+              </Marker>
             </MapContainer>
           </div>
           <div className="data-container">
-            <h2>Precipitation Data</h2>
-            <img src={`data:image/png;base64,${precipitationImage}`} alt="Precipitation Plot" />
-
-            <h2>Soil Moisture Data</h2>
-            <img src={`data:image/png;base64,${soilImage}`} alt="Soil Moisture Plot" />
-
-            <h2>Temperature Data</h2>
-            <img src={`data:image/png;base64,${temperatureImage}`} alt="Temperature Plot" />
+            <h2>Chatbot Advice</h2>
+            <p>{chatbotResponse}</p>
           </div>
         </main>
       )}
-      <footer className="app-footer">
-        <p>Powered by OpenStreetMap | GeoTech Solutions</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
 
 export default App;
-
 
 
 

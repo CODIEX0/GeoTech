@@ -6,19 +6,7 @@ import Select from 'react-select';
 import './App.css';
 import Header from './header';
 import Footer from './footer';
-
-const locations = [
-  { value: [-26.2041, 28.0473], label: 'Gauteng' },
-  { value: [-33.9249, 18.4241], label: 'Western Cape' },
-  { value: [-29.8587, 31.0218], label: 'KwaZulu-Natal' },
-  { value: [-25.7479, 28.2293], label: 'Limpopo' },
-  { value: [-28.4793, 24.6727], label: 'Northern Cape' },
-  { value: [-31.2532, 26.5225], label: 'Eastern Cape' },
-  { value: [-29.6006, 30.3794], label: 'Free State' },
-  { value: [-23.9045, 29.4689], label: 'Mpumalanga' },
-  { value: [-27.4698, 29.9324], label: 'North West' }
-];
-
+import Search from './search';
 function App() {
   const [weatherData, setWeatherData] = useState(null);
   const [chatbotResponse, setChatbotResponse] = useState('');

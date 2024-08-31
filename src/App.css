@@ -6,56 +6,6 @@ body {
   background-color: #ffffff;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.app-header {
-  background-color: #084f0a;
-  color: white;
-  padding: 20px;
-  text-align: center;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 2em;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-container {
-  width: 100%;
-  height: 100%;
-  flex: 1;
-  position: relative;
-}
-
-.map {
-  height: 100%;
-  width: 100%;
-}
-
-.app-footer {
-  background-color: #234404;
-  color: white;
-  text-align: center;
-  padding: 10px;
-}
-
-.app-footer p {
-  margin: 0;
-  font-size: 0.9em;
-}
-
 
 #hero-section{
   display: flex;
@@ -83,6 +33,7 @@ body {
 .text{
   font-size: 1.2rem;
   color: #000;
+  opacity: 0.7;
 }
 .navbar{
   scroll-behavior: smooth;
@@ -95,6 +46,7 @@ body {
   color: white ;
 }
 
+
 .navbar.sticky{
   transition: 0.6s;
   background-color: white;
@@ -103,6 +55,11 @@ body {
   box-shadow: 4px 4px 4px 4px rgba(0.2, 0.2, 0.2, 0.1);
 }
 
+.navbar.sticky ul .navitem{
+  color: #222;
+  display: inline-block;
+  font-weight: 600;
+}
 .navlist{
   margin-top: -2.7rem;  
 }
@@ -113,8 +70,12 @@ body {
   gap: 5rem;
   justify-content: end;
 }
-
+.navbar ul .navitem.active{
+  opacity: 1;
+}
 .navbar ul .navitem{
+  color: white;
+  opacity: 0.75;
   font-family: var(--bs-font-sans-serif);
   font-size: 1.2em;
   list-style: none;
@@ -124,6 +85,7 @@ body {
 
 .navbar ul .navitem:hover{
   cursor:pointer;
+  opacity: 1;
 }
 
 .navbar-brand{
@@ -136,4 +98,42 @@ body {
 
 .navbar-brand:hover{
   cursor: pointer;
+}
+
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -40px;
+
+}
+
+input[type="text"] {
+  width: 400px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  font-size: 16px;
+}
+
+button {
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-left: none;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 16px;
+  margin-left: -70px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.header-img{
+  margin-top: 10rem;
+  margin-left: 10rem;
+  width: 70%;
 }

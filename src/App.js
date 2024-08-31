@@ -6,7 +6,20 @@ import Select from 'react-select';
 import './App.css';
 import Header from './header';
 import Footer from './footer';
-import Search from './search';
+
+// Define locations with latitude and longitude values
+const locations = [
+  { value: [-26.2041, 28.0473], label: 'Gauteng' },
+  { value: [-33.9249, 18.4241], label: 'Western Cape' },
+  { value: [-29.8587, 31.0218], label: 'KwaZulu-Natal' },
+  { value: [-25.7479, 28.2293], label: 'Limpopo' },
+  { value: [-28.4793, 24.6727], label: 'Northern Cape' },
+  { value: [-31.2532, 26.5225], label: 'Eastern Cape' },
+  { value: [-29.6006, 30.3794], label: 'Free State' },
+  { value: [-23.9045, 29.4689], label: 'Mpumalanga' },
+  { value: [-27.4698, 29.9324], label: 'North West' }
+];
+
 function App() {
   const [weatherData, setWeatherData] = useState(null);
   const [chatbotResponse, setChatbotResponse] = useState('');
@@ -37,7 +50,6 @@ function App() {
     const soilTemperature = data.hourly.soil_temperature_0cm[0]; // Soil temperature
     const soilMoisture = data.hourly.soil_moisture_0_to_10cm[0]; // Soil moisture
 
-    // Construct a query for Meta AI based on the weather data
     const query = `Given the temperature of ${temperature}°C, precipitation of ${precipitation}mm, soil temperature of ${soilTemperature}°C, and soil moisture of ${soilMoisture}, provide advice on addressing climate-related challenges such as deforestation, drought, or urban heat islands.`;
 
     try {
@@ -130,13 +142,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-
-
-
-
-

@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import Header from './header';
 import Footer from './footer';
-import Search from './search';
 function App() {
   const [geoData, setGeoData] = useState(null);
 
@@ -25,7 +24,6 @@ function App() {
   return (
     <div className="app">
       <Header/>
-      <Search/>
        <Footer/>
       
     </div>

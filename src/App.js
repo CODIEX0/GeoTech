@@ -15,11 +15,11 @@ const locations = [
   { value: [-33.5821, 19.4475], label: 'Worcester' },
   { value: [-34.0469, 24.6906], label: 'Oudtshoorn' },
   { value: [-34.0833, 18.8667], label: 'Stellenbosch' },
-  { value: [-34.0375, 18.4157], label: 'Paarl' },
-  { value: [-34.2528, 18.7964], label: 'Hermanus' },
-  { value: [-34.0524, 18.4794], label: 'Somerset West' },
-  { value: [-33.9173, 18.8658], label: 'George' },
-  { value: [-33.9601, 18.5172], label: 'Knysna' },
+  // { value: [-34.0375, 18.4157], label: 'Paarl' },
+  // { value: [-34.2528, 18.7964], label: 'Hermanus' },
+  // { value: [-34.0524, 18.4794], label: 'Somerset West' },
+  // { value: [-33.9173, 18.8658], label: 'George' },
+  // { value: [-33.9601, 18.5172], label: 'Knysna' },
 ];
 
 
@@ -29,6 +29,19 @@ function App() {
   const [report, setReport] = useState('');
   const selectRef = useRef(null);
 
+  function generateReport()
+{
+  const pdfFiles = ['data/capetown.pdf', 'data/worcester.pdf', 'data/oudtshoorn.pdf', 'data/stellenbosch.pdf'];
+
+  // Loop through each file and download it
+  pdfFiles.forEach(file => {
+    const link = document.createElement('a');
+    link.href = file;
+    link.download = file;
+    link.click();
+  });
+
+}
   const fetchWeatherData = async (latitude, longitude) => {
     try {
       const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
@@ -40,7 +53,7 @@ function App() {
         }
       });
       setWeatherData(response.data);
-      generateReportWithGemini(); 
+      // generateReportWithGemini(); 
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
@@ -59,10 +72,20 @@ function App() {
   const prepareGraphData = () => {
     if (!weatherData) return [];
     const hours = weatherData.hourly.time;
+    
     const temperatures = weatherData.hourly.temperature_2m;
     const precipitations = weatherData.hourly.precipitation;
     const soilTemperatures = weatherData.hourly.soil_temperature_0cm;
     const soilMoistures = weatherData.hourly.soil_moisture_0_to_10cm;
+
+    console.log("hours: ", hours);
+    console.log("temparatures: ", temperatures);
+    console.log("precipatitions: ", precipitations);
+    console.log("soil temparatures: ", soilTemperatures);
+    console.log("soil moistures: ", soilMoistures);
+
+
+
 
     return hours.map((hour, index) => ({
       hour: hour,
@@ -73,36 +96,59 @@ function App() {
     }));
   };
 
-  const generateReportWithGemini = async () => {
-    if (!weatherData) return;
-
-    const prompt = `
-    Based on the following weather data:
-    - Temperature: ${weatherData.hourly.temperature_2m.join(', ')}
-    - Precipitation: ${weatherData.hourly.precipitation.join(', ')}
-    - Soil Temperature: ${weatherData.hourly.soil_temperature_0cm.join(', ')}
-    - Soil Moisture: ${weatherData.hourly.soil_moisture_0_to_10cm.join(', ')}
-    
-    Generate a summary report.
-    `;
-
-    try {
-      const response = await axios.post('https://api.open-meteo.com/v1/forecast', {
-        prompt: prompt
-      }, {
-        headers: {
-          'Authorization': `Bearer ${"AIzaSyDA7RpnWaEiD0HfmrXuzuoYFPw9n4530Ww"}`, 
-          'Content-Type': 'application/json'
-        }
-      });
-
-      setReport(response.data.summary); 
-    } catch (error) {
-      console.error('Error generating report with Gemini:', error.response ? error.response.data : error.message);
-    }
-  };
+  // const generateReportWithGemini = async () => {
+  //   if (!weatherData) return;
+  
+  //   const prompt = `
+  //     Based on the following weather data:
+  //     - Temperature: ${weatherData.hourly.temperature_2m.join(', ')}
+  //     - Precipitation: ${weatherData.hourly.precipitation.join(', ')}
+  //     - Soil Temperature: ${weatherData.hourly.soil_temperature_0cm.join(', ')}
+  //     - Soil Moisture: ${weatherData.hourly.soil_moisture_0_to_10cm.join(', ')}
+      
+  //     Generate a summary report.
+  //   `;
+  
+  //   try {
+  //     const response = await axios.post('https://api.ai.meta.com/v1/generate', {
+  //       prompt: prompt,
+  //       maxTokens: 2048,
+  //       temperature: 0.5,
+  //     }, {
+  //       headers: {
+  //         'Authorization': `Bearer ${'d600de8b51e542f4adc3e4e189f08283'}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  
+  //     setReport(response.data.choices[0].text);
+  //   } catch (error) {
+  //     console.error('Error generating report with Gemini:', error.response ? error.response.data : error.message);
+  //   }
+  // };
 
   const graphData = prepareGraphData();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Example usage
+// locations.forEach(location => {
+//   const [latitude, longitude] = location.value;
+//   fetchWeatherData(latitude, longitude).then(weatherData => {
+//     generateAndSaveReport(location.label, weatherData);
+//   });
+// });
 
   return (
     <div className="app">
@@ -214,11 +260,8 @@ function App() {
               </div>
             </Carousel>
           </div>
-          <div className="report-container">
-            <h3>Generated Report</h3>
-            <p>{report}</p>
-          </div>
-        </main>
+          <button onClick={generateReport()}>Generate Report</button>
+          </main>
       )}
       <Footer />
     </div>

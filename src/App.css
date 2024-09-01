@@ -35,7 +35,7 @@ body {
   margin-left: 20px; /* Adjust positioning as needed */
 }
 
-/* #hero-section{
+#hero-section{
   display: flex;
   justify-content: start;
   align-items: center;
@@ -53,7 +53,7 @@ body {
   height: 100%;
   background: rgba(0, 0, 0, 0.5); 
   z-index: -1; 
-} */
+} 
 .hero-content{
   text-align: start ;
   padding-left: 4.5rem;

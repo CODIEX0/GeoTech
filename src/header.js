@@ -13,8 +13,8 @@ function header()
             <section id="hero-section">
                 
                 <div  className="hero-content ">
-                <h1 className="main-header"> </h1>
-                    GeoTech                        
+                <h1 className="main-header">GeoTech</h1>
+                                            
                 <p className="text">Make a change | Make a green change</p>
                 {/* <div className="search-container">
                 <form action="/search" method="GET">
@@ -22,6 +22,7 @@ function header()
                     <button type="submit">Search</button>
                 </form>
                 </div> */}
+                <button>Learn more</button>
                 </div>
 
                 <img className="header-img" alt="" src="https://github.com/CODIEX0/GeoTech/blob/main/images/woman-farmer.png?raw=true"/>

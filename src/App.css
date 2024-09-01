@@ -3,7 +3,8 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #ffffff;
+  overflow-x: hidden;
+  background-color: floralwhite;
 }
 
 #hero-section {
@@ -11,6 +12,7 @@ body {
   justify-content: start;
   align-items: center;
   height: 100vh;
+  z-index: 1;
   background: url("../images/f1.jpg") center/cover no-repeat;
   font-family: var(--bs-font-sans-serif);
   position: relative; /* Keeps content layers separate */
@@ -77,6 +79,7 @@ body {
 .navbar{
   scroll-behavior: smooth;
   transition: 0.6s;
+  z-index: 20;
   padding: 0.8rem;
   top: 0;
   right: 0;
@@ -88,6 +91,8 @@ body {
 
 .navbar.sticky{
   transition: 0.6s;
+  z-index: 20;
+
   background-color: white;
   color: #333; 
   padding: 5px 10px ;
@@ -175,3 +180,44 @@ button:hover {
   margin-left: 10rem;
   width: 70%;
 }
+
+.select-container{
+  padding-bottom: 4rem;
+  z-index: 0;
+}
+
+main{
+  min-height: 100vh;
+}
+
+.chart-container {
+  margin-bottom: 40px;
+}
+
+.data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.carousel .slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto; 
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 650px; 
+  text-align: center; 
+}
+

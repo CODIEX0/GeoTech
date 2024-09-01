@@ -3,21 +3,35 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Select from 'react-select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'; // Import Recharts components
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './App.css';
 import Header from './header';
 import Footer from './footer';
-import Data from './data';
+
+const locations = [
+  { value: [-33.9249, 18.4241], label: 'Cape Town' },
+  { value: [-33.5821, 19.4475], label: 'Worcester' },
+  { value: [-34.0469, 24.6906], label: 'Oudtshoorn' },
+  { value: [-34.0833, 18.8667], label: 'Stellenbosch' },
+  { value: [-34.0375, 18.4157], label: 'Paarl' },
+  { value: [-34.2528, 18.7964], label: 'Hermanus' },
+  { value: [-34.0524, 18.4794], label: 'Somerset West' },
+  { value: [-33.9173, 18.8658], label: 'George' },
+  { value: [-33.9601, 18.5172], label: 'Knysna' },
+];
 
 
 function App() {
   const [weatherData, setWeatherData] = useState(null);
   const [location, setLocation] = useState(null);
+  const [report, setReport] = useState('');
   const selectRef = useRef(null);
 
   const fetchWeatherData = async (latitude, longitude) => {
     try {
-      const response = await axios.get(`https://api.open-meteo.com/v1/forecast`, {
+      const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
         params: {
           latitude,
           longitude,
@@ -26,6 +40,7 @@ function App() {
         }
       });
       setWeatherData(response.data);
+      generateReportWithGemini(); 
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
@@ -35,28 +50,56 @@ function App() {
     if (selectedOption) {
       const [lat, lon] = selectedOption.value;
       setLocation([parseFloat(lat), parseFloat(lon)]);
-      fetchWeatherData(lat, lon); // Fetch weather data for the selected location
+      fetchWeatherData(lat, lon);
     } else {
       setLocation(null);
     }
   };
 
-  // Prepare data for the graphs
   const prepareGraphData = () => {
     if (!weatherData) return [];
-    const hours = weatherData.hourly.time; // Assuming this is an array of time strings
-    const temperatures = weatherData.hourly.temperature_2m; // Assuming this is an array of temperatures
-    const precipitations = weatherData.hourly.precipitation; // Assuming this is an array of precipitation
-    const soilTemperatures = weatherData.hourly.soil_temperature_0cm; // Soil temperatures
-    const soilMoistures = weatherData.hourly.soil_moisture_0_to_10cm; // Soil moisture
+    const hours = weatherData.hourly.time;
+    const temperatures = weatherData.hourly.temperature_2m;
+    const precipitations = weatherData.hourly.precipitation;
+    const soilTemperatures = weatherData.hourly.soil_temperature_0cm;
+    const soilMoistures = weatherData.hourly.soil_moisture_0_to_10cm;
 
     return hours.map((hour, index) => ({
-      hour: hour, // Time
-      temperature: temperatures[index], // Temperature
-      precipitation: precipitations[index], // Precipitation
-      soilTemperature: soilTemperatures[index], // Soil Temperature
-      soilMoisture: soilMoistures[index], // Soil Moisture
+      hour: hour,
+      temperature: temperatures[index],
+      precipitation: precipitations[index],
+      soilTemperature: soilTemperatures[index],
+      soilMoisture: soilMoistures[index],
     }));
+  };
+
+  const generateReportWithGemini = async () => {
+    if (!weatherData) return;
+
+    const prompt = `
+    Based on the following weather data:
+    - Temperature: ${weatherData.hourly.temperature_2m.join(', ')}
+    - Precipitation: ${weatherData.hourly.precipitation.join(', ')}
+    - Soil Temperature: ${weatherData.hourly.soil_temperature_0cm.join(', ')}
+    - Soil Moisture: ${weatherData.hourly.soil_moisture_0_to_10cm.join(', ')}
+    
+    Generate a summary report.
+    `;
+
+    try {
+      const response = await axios.post('https://api.open-meteo.com/v1/forecast', {
+        prompt: prompt
+      }, {
+        headers: {
+          'Authorization': `Bearer ${"AIzaSyDA7RpnWaEiD0HfmrXuzuoYFPw9n4530Ww"}`, 
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setReport(response.data.summary); 
+    } catch (error) {
+      console.error('Error generating report with Gemini:', error.response ? error.response.data : error.message);
+    }
   };
 
   const graphData = prepareGraphData();
@@ -64,9 +107,37 @@ function App() {
   return (
     <div className="app">
       <Header />
-      <Data/>
       <div className="app-header">
-        
+        <div className="select-container">
+          <Select
+            ref={selectRef}
+            placeholder="Select a location..."
+            options={locations}
+            onChange={handleLocationSelect}
+            isClearable
+            menuPortalTarget={document.body}
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                color: 'black',
+                fontWeight: 'bold',
+                zIndex: 1000,
+                position: 'absolute',
+                top: '10px',
+                left: '10px'
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: 'black'
+              }),
+              menuPortal: (base) => ({
+                ...base,
+                zIndex: 9999
+              })
+            }}
+          />
+        </div>
       </div>
       {location && weatherData && (
         <main>
@@ -87,24 +158,65 @@ function App() {
               </Marker>
             </MapContainer>
           </div>
-          <div className="data-container">
-            <h2>Weather Data Over Time</h2>
-            <LineChart
-              width={600}
-              height={300}
-              data={graphData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="hour" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="temperature" stroke="#8884d8" />
-              <Line type="monotone" dataKey="precipitation" stroke="#82ca9d" />
-              <Line type="monotone" dataKey="soilTemperature" stroke="#ff7300" />
-              <Line type="monotone" dataKey="soilMoisture" stroke="#ff0000" />
-            </LineChart>
+          <div className="carousel-container">
+            <Carousel showArrows={true} infiniteLoop={true} showThumbs={false}>
+              {/* Temperature Chart */}
+              <div className="chart-container">
+                <h3>Temperature</h3>
+                <LineChart
+                  width={600}
+                  height={300}
+                  data={graphData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="temperature" stroke="#8884d8" />
+                </LineChart>
+              </div>
+              {/* Precipitation Chart */}
+              <div className="chart-container">
+                <h3>Precipitation</h3>
+                <LineChart
+                  width={600}
+                  height={300}
+                  data={graphData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="precipitation" stroke="#82ca9d" />
+                </LineChart>
+              </div>
+              {/* Soil Temperature & Moisture Chart */}
+              <div className="chart-container">
+                <h3>Soil Temperature & Moisture</h3>
+                <LineChart
+                  width={600}
+                  height={300}
+                  data={graphData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="soilTemperature" stroke="#ff7300" />
+                  <Line type="monotone" dataKey="soilMoisture" stroke="#ff0000" />
+                </LineChart>
+              </div>
+            </Carousel>
+          </div>
+          <div className="report-container">
+            <h3>Generated Report</h3>
+            <p>{report}</p>
           </div>
         </main>
       )}

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Select from 'react-select';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'; // Import Recharts components
 import './App.css';
 import Header from './header';
 import Footer from './footer';
@@ -22,7 +23,6 @@ const locations = [
 
 function App() {
   const [weatherData, setWeatherData] = useState(null);
-  const [chatbotResponse, setChatbotResponse] = useState('');
   const [location, setLocation] = useState(null);
   const selectRef = useRef(null);
 
@@ -37,31 +37,8 @@ function App() {
         }
       });
       setWeatherData(response.data);
-      const responseText = await getChatbotResponse(response.data);
-      setChatbotResponse(responseText);
     } catch (error) {
       console.error('Error fetching weather data:', error);
-    }
-  };
-
-  const getChatbotResponse = async (data) => {
-    const temperature = data.hourly.temperature_2m[0]; // Current temperature
-    const precipitation = data.hourly.precipitation[0]; // Current precipitation
-    const soilTemperature = data.hourly.soil_temperature_0cm[0]; // Soil temperature
-    const soilMoisture = data.hourly.soil_moisture_0_to_10cm[0]; // Soil moisture
-
-    const query = `Given the temperature of ${temperature}°C, precipitation of ${precipitation}mm, soil temperature of ${soilTemperature}°C, and soil moisture of ${soilMoisture}, provide advice on addressing climate-related challenges such as deforestation, drought, or urban heat islands.`;
-
-    try {
-      const metaAIResponse = await axios.post('https://api.meta.com/v1/chat', {
-        prompt: query,
-        model: 'LLaMA-3', // Change this to the appropriate model name
-        max_tokens: 150
-      });
-      return metaAIResponse.data.response; // Adjust based on the actual response structure
-    } catch (error) {
-      console.error('Error fetching Meta AI response:', error);
-      return "I'm unable to provide advice at the moment.";
     }
   };
 
@@ -74,6 +51,26 @@ function App() {
       setLocation(null);
     }
   };
+
+  // Prepare data for the graphs
+  const prepareGraphData = () => {
+    if (!weatherData) return [];
+    const hours = weatherData.hourly.time; // Assuming this is an array of time strings
+    const temperatures = weatherData.hourly.temperature_2m; // Assuming this is an array of temperatures
+    const precipitations = weatherData.hourly.precipitation; // Assuming this is an array of precipitation
+    const soilTemperatures = weatherData.hourly.soil_temperature_0cm; // Soil temperatures
+    const soilMoistures = weatherData.hourly.soil_moisture_0_to_10cm; // Soil moisture
+
+    return hours.map((hour, index) => ({
+      hour: hour, // Time
+      temperature: temperatures[index], // Temperature
+      precipitation: precipitations[index], // Precipitation
+      soilTemperature: soilTemperatures[index], // Soil Temperature
+      soilMoisture: soilMoistures[index], // Soil Moisture
+    }));
+  };
+
+  const graphData = prepareGraphData();
 
   return (
     <div className="app">
@@ -113,7 +110,7 @@ function App() {
       </div>
       {location && weatherData && (
         <main>
-          <div className="map-container" style={{ height: '400px' }}>
+          <div className="map-container">
             <MapContainer center={location} zoom={8} className="map">
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -131,8 +128,23 @@ function App() {
             </MapContainer>
           </div>
           <div className="data-container">
-            <h2>Chatbot Advice</h2>
-            <p>{chatbotResponse}</p>
+            <h2>Weather Data Over Time</h2>
+            <LineChart
+              width={600}
+              height={300}
+              data={graphData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="hour" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="temperature" stroke="#8884d8" />
+              <Line type="monotone" dataKey="precipitation" stroke="#82ca9d" />
+              <Line type="monotone" dataKey="soilTemperature" stroke="#ff7300" />
+              <Line type="monotone" dataKey="soilMoisture" stroke="#ff0000" />
+            </LineChart>
           </div>
         </main>
       )}

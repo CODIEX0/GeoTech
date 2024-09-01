@@ -7,19 +7,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'r
 import './App.css';
 import Header from './header';
 import Footer from './footer';
+import Data from './data';
 
-// Define locations with latitude and longitude values
-const locations = [
-  { value: [-26.2041, 28.0473], label: 'Gauteng' },
-  { value: [-33.9249, 18.4241], label: 'Western Cape' },
-  { value: [-29.8587, 31.0218], label: 'KwaZulu-Natal' },
-  { value: [-25.7479, 28.2293], label: 'Limpopo' },
-  { value: [-28.4793, 24.6727], label: 'Northern Cape' },
-  { value: [-31.2532, 26.5225], label: 'Eastern Cape' },
-  { value: [-29.6006, 30.3794], label: 'Free State' },
-  { value: [-23.9045, 29.4689], label: 'Mpumalanga' },
-  { value: [-27.4698, 29.9324], label: 'North West' }
-];
 
 function App() {
   const [weatherData, setWeatherData] = useState(null);
@@ -75,38 +64,9 @@ function App() {
   return (
     <div className="app">
       <Header />
+      <Data/>
       <div className="app-header">
-        <h1>GeoTech Climate Resilience</h1>
-        <div className="select-container">
-          <Select
-            ref={selectRef}
-            placeholder="Select a location..."
-            options={locations}
-            onChange={handleLocationSelect}
-            isClearable
-            menuPortalTarget={document.body}
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                color: 'black',
-                fontWeight: 'bold',
-                zIndex: 1000,
-                position: 'absolute',
-                top: '10px',
-                left: '10px'
-              }),
-              singleValue: (base) => ({
-                ...base,
-                color: 'black'
-              }),
-              menuPortal: (base) => ({
-                ...base,
-                zIndex: 9999
-              })
-            }}
-          />
-        </div>
+        
       </div>
       {location && weatherData && (
         <main>

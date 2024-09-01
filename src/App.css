@@ -19,21 +19,23 @@ body {
 .hero-content{
   text-align: start ;
   padding-left: 4.5rem;
-  color: white;
-  font-weight: 700;
-  font-size: 6rem;
+  
 
 }
 
 .hero-content h1{
   text-shadow: 2px 4px rgba(1, 1, 2, 1.5);
-
+  color: white;
+  font-weight: 700;
+  font-size: 6rem;
 }
 
 .text{
   font-size: 1.2rem;
-  color: #000;
+  color: white;
   opacity: 0.7;
+  margin-top: -58px;
+  font-weight: 400;
 }
 .navbar{
   scroll-behavior: smooth;
@@ -118,14 +120,13 @@ input[type="text"] {
 
 button {
   padding: 15px;
-  border: 1px solid #ccc;
+  border: 12px;
   border-left: none;
   background-color: #4CAF50;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   border-radius: 16px;
-  margin-left: -70px;
 }
 
 button:hover {
